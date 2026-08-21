@@ -63,7 +63,11 @@ abstract class provider {
         if ($actionconfig == '') {
             $this->actionconfig = static::initialise_action_settings();
         } else {
-            $this->actionconfig = json_decode($actionconfig, true);
+            $storedactionconfig = json_decode($actionconfig, true);
+            $missingactions = array_diff(static::get_action_list(), array_keys($storedactionconfig));
+            $this->actionconfig = empty($missingactions)
+                ? $storedactionconfig
+                : array_replace(static::initialise_action_settings(), $storedactionconfig);
         }
     }
 

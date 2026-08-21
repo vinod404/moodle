@@ -16,6 +16,7 @@
 
 namespace aiprovider_gemini\form;
 
+use aiprovider_gemini\aimodel\gemini_base;
 use aiprovider_gemini\helper;
 use core_ai\form\action_settings_form;
 
@@ -161,8 +162,6 @@ class action_form extends action_settings_form {
         global $PAGE;
         $PAGE->requires->js_call_amd('aiprovider_gemini/modelchooser', 'init');
         $mform = $this->_form;
-        $actionname = $this->actionname;
-
         // Determine which model to use as the default.
         if (
             !empty($this->actionconfig['model']) &&
@@ -173,7 +172,7 @@ class action_form extends action_settings_form {
         ) {
             $defaultmodel = 'custom';
         } else if (empty($this->actionconfig['model'])) {
-            $defaultmodel = ($actionname === 'generate_image') ? 'gemini-3.1-flash-image' : 'gemini-2.5-flash';
+            $defaultmodel = ($modeltype === gemini_base::MODEL_TYPE_IMAGE) ? 'gemini-3.1-flash-image' : 'gemini-2.5-flash';
         } else {
             $defaultmodel = $this->actionconfig['model'];
         }

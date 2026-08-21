@@ -1,0 +1,13 @@
+issueNumber: MDL-89359
+notes:
+  core_ai:
+    - message: >-
+        Third-party AI action classes must now implement
+        `required_model_capabilities(): array` and return `core_ai\aimodel\model_capability`
+        enum values. Actions which do not declare compatible required capabilities
+        may no longer appear in provider `get_action_list()` results resolved via
+        `core_ai\aiactions\supported_actions`. Providers now use the
+        `process_generate_text` processor for text actions; the ad hoc
+        `process_explain_text` and `process_summarise_text` classes are deprecated
+        and will be removed as part of MDL-89715.
+      type: improved

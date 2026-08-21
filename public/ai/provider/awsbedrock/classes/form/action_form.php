@@ -17,6 +17,7 @@
 namespace aiprovider_awsbedrock\form;
 
 use aiprovider_awsbedrock\helper;
+use aiprovider_awsbedrock\model_definition;
 use core_ai\form\action_settings_form;
 
 /**
@@ -157,7 +158,6 @@ class action_form extends action_settings_form {
         global $PAGE;
         $PAGE->requires->js_call_amd('aiprovider_awsbedrock/modelchooser', 'init');
         $mform = $this->_form;
-        $actionname = $this->actionname;
         // Determine which model to use as the default.
         if (
             !empty($this->actionconfig['model']) &&
@@ -166,7 +166,9 @@ class action_form extends action_settings_form {
         ) {
             $defaultmodel = 'custom';
         } else if (empty($this->actionconfig['model'])) {
-            $defaultmodel = ($actionname === 'generate_image') ? 'amazon.nova-canvas-v1:0' : 'amazon.nova-pro-v1:0';
+            $defaultmodel = ($modeltype === model_definition::MODEL_TYPE_IMAGE)
+                ? 'amazon.nova-canvas-v1:0'
+                : 'amazon.nova-pro-v1:0';
         } else {
             $defaultmodel = $this->actionconfig['model'];
         }

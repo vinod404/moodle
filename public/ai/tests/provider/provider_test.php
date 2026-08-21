@@ -63,6 +63,34 @@ final class provider_test extends \advanced_testcase {
     }
 
     /**
+     * Test provider action defaults are available for newly registered actions.
+     */
+    public function test_action_config_merges_current_defaults(): void {
+        $this->resetAfterTest();
+
+        $savedactionconfig = [
+            generate_text::class => [
+                'enabled' => false,
+                'settings' => ['model' => 'saved-model'],
+            ],
+        ];
+        $provider = new \aiprovider_openai\provider(
+            enabled: true,
+            name: 'test provider',
+            config: '{}',
+            actionconfig: json_encode($savedactionconfig),
+        );
+        $defaultactionconfig = \aiprovider_openai\provider::initialise_action_settings();
+
+        $this->assertFalse($provider->actionconfig[generate_text::class]['enabled']);
+        $this->assertSame('saved-model', $provider->actionconfig[generate_text::class]['settings']['model']);
+        $this->assertSame(
+            $defaultactionconfig[generate_image::class],
+            $provider->actionconfig[generate_image::class],
+        );
+    }
+
+    /**
      * Test get_contexts_for_userid().
      */
     public function test_get_contexts_for_userid(): void {

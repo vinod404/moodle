@@ -49,6 +49,8 @@ $manager = \core\di::get(\core_ai\manager::class);
 $providerrecord = $manager->get_provider_record(['id' => $id], MUST_EXIST);
 
 $actionconfig = json_decode($providerrecord->actionconfig, true, 512, JSON_THROW_ON_ERROR);
+$providerclass = "\\$provider\\provider";
+$actionconfig = array_replace($providerclass::initialise_action_settings(), $actionconfig);
 $actionconfig = $actionconfig[$action];
 
 $customdata['actionconfig'] = $actionconfig;
@@ -68,7 +70,6 @@ $PAGE->set_pagelayout('admin');
 $PAGE->set_title($title);
 $PAGE->set_heading($title);
 
-$providerclass = "\\$provider\\provider";
 $mform = $providerclass::get_action_settings($action, $customdata);
 
 if ($mform->is_cancelled()) {

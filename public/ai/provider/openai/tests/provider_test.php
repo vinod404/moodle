@@ -16,6 +16,8 @@
 
 namespace aiprovider_openai;
 
+use core_ai\tests\aiactions\fixtures\text_feature_action;
+
 /**
  * Test OpenAI provider methods.
  *
@@ -58,6 +60,13 @@ final class provider_test extends \advanced_testcase {
         $this->assertContains(\core_ai\aiactions\generate_image::class, $actionlist);
         $this->assertContains(\core_ai\aiactions\summarise_text::class, $actionlist);
         $this->assertContains(\core_ai\aiactions\explain_text::class, $actionlist);
+
+        $customaction = text_feature_action::class;
+        $this->assertInstanceOf(
+            form\action_generate_text_form::class,
+            provider::get_action_settings($customaction),
+        );
+        $this->assertNotEmpty(provider::get_action_setting_defaults($customaction));
     }
 
     /**

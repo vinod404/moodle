@@ -16,6 +16,7 @@
 
 namespace aiprovider_openai\form;
 
+use aiprovider_openai\aimodel\openai_base;
 use aiprovider_openai\helper;
 use core_ai\form\action_settings_form;
 
@@ -161,15 +162,13 @@ class action_form extends action_settings_form {
         global $PAGE;
         $PAGE->requires->js_call_amd('aiprovider_openai/modelchooser', 'init');
         $mform = $this->_form;
-        $actionname = $this->actionname;
-
         // Determine which model to use as the default.
         if (!empty($this->actionconfig['model']) &&
                 (!array_key_exists($this->actionconfig['model'], $this->get_model_list($modeltype)) ||
                 !empty($this->actionconfig['modelextraparams']))) {
             $defaultmodel = 'custom';
         } else if (empty($this->actionconfig['model'])) {
-            $defaultmodel = ($actionname === 'generate_image') ? 'gpt-image-1.5' : 'gpt-4o';
+            $defaultmodel = ($modeltype === openai_base::MODEL_TYPE_IMAGE) ? 'gpt-image-1.5' : 'gpt-4o';
         } else {
             $defaultmodel = $this->actionconfig['model'];
         }
