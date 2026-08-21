@@ -17,6 +17,7 @@
 namespace core_ai\aiactions;
 
 use core_ai\aiactions\responses\response_base;
+use core_ai\aimodel\model_capability;
 
 /**
  * Base Action class.
@@ -98,6 +99,15 @@ abstract class base {
         }
 
         return get_string($stringid, 'core_ai');
+    }
+
+    /**
+     * Get the model capabilities required by the action.
+     *
+     * @return model_capability[]
+     */
+    public static function required_model_capabilities(): array {
+        return [];
     }
 
     /**

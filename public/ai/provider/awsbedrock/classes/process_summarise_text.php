@@ -21,7 +21,13 @@ namespace aiprovider_awsbedrock;
  *
  * @package    aiprovider_awsbedrock
  * @copyright  2025 Matt Porritt <matt.porritt@moodle.com>
+ * @deprecated since Moodle 5.3 MDL-89359. Use process_generate_text instead.
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[\core\attribute\deprecated(
+    replacement: 'process_generate_text',
+    since: '5.3',
+    mdl: 'MDL-89359',
+)]
 class process_summarise_text extends process_generate_text {
 }

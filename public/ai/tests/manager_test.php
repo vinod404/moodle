@@ -16,6 +16,7 @@
 
 namespace core_ai;
 
+use core_ai\aimodel\model_capability;
 use core_ai\aiactions\generate_image;
 use core_ai\aiactions\generate_text;
 use core_ai\aiactions\summarise_text;
@@ -85,10 +86,10 @@ final class manager_test extends \advanced_testcase {
 
         // Assert array keys match the expected actions.
         $this->assertEquals([
-            generate_text::class,
-            generate_image::class,
             summarise_text::class,
             explain_text::class,
+            generate_text::class,
+            generate_image::class,
         ], $actions);
     }
 
@@ -388,7 +389,7 @@ final class manager_test extends \advanced_testcase {
         // Disable the generate text action for the Open AI provider.
         $setresult = $manager->set_action_state(
                 plugin: $provider1->provider,
-                actionbasename: generate_text::class::get_basename(),
+            actionbasename: generate_text::class,
                 enabled: 0,
                 instanceid: $provider1->id);
         // Assert that the action was disabled.
@@ -458,6 +459,39 @@ final class manager_test extends \advanced_testcase {
 
         // Success should be false as there are no enabled providers.
         $result = $managermock->process_action($action);
+        $this->assertFalse($result->get_success());
+    }
+
+    /**
+     * Test process_action uses the response class declared by a custom action when no provider is available.
+     */
+    public function test_process_action_without_provider_uses_custom_response_class(): void {
+        $this->resetAfterTest();
+
+        $action = new class (contextid: 1) extends aiactions\base {
+            /**
+             * Store the action response.
+             *
+             * @param aiactions\responses\response_base $response The response to store.
+             * @return int The stored action ID.
+             */
+            public function store(aiactions\responses\response_base $response): int {
+                return 0;
+            }
+
+            /**
+             * Get the class name of the response object.
+             *
+             * @return string The response class name.
+             */
+            public static function get_response_classname(): string {
+                return aiactions\responses\response_generate_image::class;
+            }
+        };
+
+        $result = \core\di::get(manager::class)->process_action($action);
+
+        $this->assertInstanceOf(aiactions\responses\response_generate_image::class, $result);
         $this->assertFalse($result->get_success());
     }
 
@@ -896,6 +930,36 @@ final class manager_test extends \advanced_testcase {
 
         // Assert the result was of the correct type.
         $this->assertInstanceOf(response_generate_image::class, $actionresult);
+    }
+
+    /**
+     * Test mixed capability actions are treated as text generators.
+     */
+    public function test_get_action_processor_class_prefers_text_for_mixed_capabilities(): void {
+        $this->resetAfterTest();
+
+        $manager = \core\di::get(manager::class);
+        $provider = $manager->create_provider_instance(
+            classname: '\aiprovider_openai\provider',
+            name: 'dummy',
+            config: ['apikey' => 'goeshere'],
+        );
+
+        $method = new \ReflectionMethod($manager, 'get_action_processor_class');
+
+        $processorclass = $method->invoke(
+            $manager,
+            $provider,
+            [
+                model_capability::OUTPUT_IMAGE,
+                model_capability::OUTPUT_TEXT,
+            ],
+        );
+
+        $this->assertSame(
+            'aiprovider_openai\process_generate_text',
+            $processorclass
+        );
     }
 
     /**

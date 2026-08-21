@@ -23,6 +23,12 @@ namespace aiprovider_gemini;
  * @copyright  2025 University of Ferrara, Italy
  * @author     Andrea Bertelli <andrea.bertelli@unife.it>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated since Moodle 5.3 MDL-89359. Use process_generate_text instead.
  */
+#[\core\attribute\deprecated(
+    replacement: 'process_generate_text',
+    since: '5.3',
+    mdl: 'MDL-89359',
+)]
 class process_summarise_text extends process_generate_text {
 }

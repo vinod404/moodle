@@ -58,6 +58,14 @@ final class provider_test extends \advanced_testcase {
         $this->assertContains(\core_ai\aiactions\generate_image::class, $actionlist);
         $this->assertContains(\core_ai\aiactions\summarise_text::class, $actionlist);
         $this->assertContains(\core_ai\aiactions\explain_text::class, $actionlist);
+
+        require_once(__DIR__ . '/../../../tests/aiactions/fixtures/text_feature_action.php');
+        $customaction = \core_ai\aiactions\text_feature_action::class;
+        $this->assertInstanceOf(
+            form\action_generate_text_form::class,
+            provider::get_action_settings($customaction),
+        );
+        $this->assertNotEmpty(provider::get_action_setting_defaults($customaction));
     }
 
     /**

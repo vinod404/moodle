@@ -17,6 +17,7 @@
 namespace core_ai;
 
 use core\exception\coding_exception;
+use core_ai\aimodel\model_capability;
 use core_ai\aiactions\base;
 use core_ai\aiactions\responses;
 use core\plugininfo\aiprovider as aiproviderplugin;
@@ -172,12 +173,32 @@ class manager {
      * @return responses\response_base The result of the action.
      */
     protected function call_action_provider(provider $provider, base $action): responses\response_base {
-        $classname = 'process_' . $action->get_basename();
-        $classpath = substr($provider::class, 0, strpos($provider::class, '\\') + 1);
-        $processclass = $classpath . $classname;
+        $capabilities = $action::required_model_capabilities();
+        if ($capabilities === []) {
+            throw new coding_exception('AI action does not declare any capabilities: ' . $action::class);
+        }
+
+        $processclass = self::get_action_processor_class($provider, $capabilities);
         $processor = new $processclass($provider, $action);
 
         return $processor->process($action);
+    }
+
+    /**
+     * Get the provider processor class for the given action capabilities.
+     *
+     * Mixed text-and-image actions are treated as text generators for now.
+     *
+     * @param provider $provider The provider to call.
+     * @param model_capability[] $capabilities The action model capabilities.
+     * @return string The processor class name.
+     */
+    private static function get_action_processor_class(provider $provider, array $capabilities): string {
+        if (in_array(model_capability::OUTPUT_TEXT, $capabilities, true)) {
+            return model_capability::OUTPUT_TEXT->get_processor_class($provider);
+        }
+
+        return model_capability::OUTPUT_IMAGE->get_processor_class($provider);
     }
 
     /**
@@ -189,9 +210,9 @@ class manager {
      * @return responses\response_base The result of the action.
      */
     public function process_action(base $action): responses\response_base {
-        // Get the action response_base name.
+        // Get the action response class name.
         $actionname = $action::class;
-        $responseclassname = 'core_ai\\aiactions\\responses\\response_' . $action->get_basename();
+        $responseclassname = $action::get_response_classname();
 
         // Get the providers that support the action.
         $providers = $this->get_providers_for_actions([$actionname], true);
@@ -372,7 +393,7 @@ class manager {
      * Set the action state for a given plugin.
      *
      * @param string $plugin The name of the plugin.
-     * @param string $actionbasename The action to be set.
+     * @param string $actionbasename The action basename or fully qualified action class name.
      * @param int $enabled The state to be set (e.g., enabled or disabled).
      * @param int $instanceid The instance id of the instance.
      * @return bool Returns true if the configuration was successfully set, false otherwise.
@@ -383,7 +404,21 @@ class manager {
         int $enabled,
         int $instanceid = 0
     ): bool {
-        $actionclass = 'core_ai\\aiactions\\' . $actionbasename;
+        $actionclass = str_contains($actionbasename, '\\')
+            ? ltrim($actionbasename, '\\')
+            : 'core_ai\\aiactions\\' . $actionbasename;
+        if (!is_a($actionclass, base::class, true)) {
+            throw new coding_exception('Unsupported AI action class: ' . $actionclass);
+        }
+        $actionbasename = $actionclass::get_basename();
+
+        if (str_contains($plugin, 'aiprovider')) {
+            $providerclass = self::get_ai_plugin_classname($plugin);
+            if (!in_array($actionclass, $providerclass::get_action_list(), true)) {
+                throw new coding_exception('Action is not supported by provider: ' . $actionclass);
+            }
+        }
+
         $oldvalue = $this->is_action_enabled($plugin, $actionclass, $instanceid);
 
         // Check if we are setting an action for a provider or placement.

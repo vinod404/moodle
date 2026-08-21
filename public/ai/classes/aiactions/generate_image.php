@@ -16,6 +16,7 @@
 
 namespace core_ai\aiactions;
 
+use core_ai\aimodel\model_capability;
 use core_ai\aiactions\responses\response_base;
 
 /**
@@ -74,5 +75,10 @@ class generate_image extends base {
         $record->revisedprompt = $responsearr['revisedprompt']; // Can be null.
 
         return $DB->insert_record($this->get_tablename(), $record);
+    }
+
+    #[\Override]
+    public static function required_model_capabilities(): array {
+        return [model_capability::OUTPUT_IMAGE];
     }
 }

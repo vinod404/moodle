@@ -84,8 +84,15 @@ class set_action extends external_api {
         self::validate_context($context);
         require_capability('moodle/site:config', $context);
 
-        [$plugin, $action] = explode('-', $plugin);
-        $actionname = get_string("action_$action", 'core_ai');
+        [$plugin, $action] = explode('-', $plugin, 2);
+        $actionclass = rawurldecode($action);
+        if (!str_contains($actionclass, '\\')) {
+            $actionclass = 'core_ai\\aiactions\\' . $actionclass;
+        }
+        if (!is_a($actionclass, \core_ai\aiactions\base::class, true)) {
+            throw new \coding_exception('Unsupported AI action class: ' . $actionclass);
+        }
+        $actionname = $actionclass::get_name();
 
         if (!empty($state)) {
             \core\notification::add(
@@ -102,7 +109,7 @@ class set_action extends external_api {
         $manager = \core\di::get(manager::class);
         $manager->set_action_state(
             plugin: $plugin,
-            actionbasename: $action,
+            actionbasename: $actionclass,
             enabled: $state,
             instanceid: $providerid
         );
