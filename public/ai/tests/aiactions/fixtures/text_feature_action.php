@@ -14,24 +14,34 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace aiprovider_ollama;
+declare(strict_types=1);
+
+namespace core_ai\aiactions;
 
 /**
- * Class process text summarisation.
+ * Test action with text capability.
  *
- * @package    aiprovider_ollama
- * @copyright  2024 Matt Porritt <matt.porritt@moodle.com>
+ * @package    core_ai
+ * @copyright  2026, Aleti Vinod Kumar <vinod.aleti@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 5.3 MDL-89359. Use process_generate_text instead.
  */
-#[\core\attribute\deprecated(
-    replacement: 'process_generate_text',
-    since: '5.3',
-    mdl: 'MDL-89359',
-)]
-class process_summarise_text extends process_generate_text {
-    #[\Override]
-    protected function get_system_instruction(): string {
-        return $this->provider->actionconfig[$this->action::class]['settings']['systeminstruction'];
+class text_feature_action extends base {
+    /**
+     * Store the response.
+     *
+     * @param responses\response_base $response
+     * @return int
+     */
+    public function store(responses\response_base $response): int {
+        return 0;
+    }
+
+    /**
+     * Get the capabilities required by the action.
+     *
+     * @return ai_capability[]
+     */
+    public static function get_required_capabilities(): array {
+        return [ai_capability::OUTPUT_TEXT];
     }
 }

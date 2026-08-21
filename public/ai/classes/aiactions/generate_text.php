@@ -63,4 +63,9 @@ class generate_text extends base {
 
         return $DB->insert_record($this->get_tablename(), $record);
     }
+
+    #[\Override]
+    public static function get_required_capabilities(): array {
+        return [ai_capability::OUTPUT_TEXT];
+    }
 }

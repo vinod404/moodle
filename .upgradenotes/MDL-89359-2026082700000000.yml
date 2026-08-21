@@ -1,0 +1,10 @@
+issueNumber: MDL-89359
+notes:
+  core_ai:
+    - message: >-
+        Third-party AI action classes must now implement
+        `get_required_capabilities(): array` and return `core_ai\aiactions\ai_capability`
+        enum values. Actions which do not declare compatible required capabilities
+        may no longer appear in provider `get_action_list()` results resolved via
+        `core_ai\aiactions\supported_actions`.
+      type: improved

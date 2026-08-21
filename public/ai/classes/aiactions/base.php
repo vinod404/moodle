@@ -101,6 +101,15 @@ abstract class base {
     }
 
     /**
+     * Get the capabilities required by the action.
+     *
+     * @return ai_capability[]
+     */
+    public static function get_required_capabilities(): array {
+        return [];
+    }
+
+    /**
      * Get a configuration option.
      *
      * @param string $name The name of the configuration option to get.

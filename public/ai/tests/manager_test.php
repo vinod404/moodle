@@ -16,6 +16,7 @@
 
 namespace core_ai;
 
+use core_ai\aiactions\ai_capability;
 use core_ai\aiactions\generate_image;
 use core_ai\aiactions\generate_text;
 use core_ai\aiactions\summarise_text;
@@ -86,10 +87,10 @@ final class manager_test extends \advanced_testcase {
 
         // Assert array keys match the expected actions.
         $this->assertEquals([
-            generate_text::class,
-            generate_image::class,
             summarise_text::class,
             explain_text::class,
+            generate_text::class,
+            generate_image::class,
         ], $actions);
     }
 
@@ -714,6 +715,36 @@ final class manager_test extends \advanced_testcase {
 
         // Assert the result was of the correct type.
         $this->assertInstanceOf(response_generate_image::class, $actionresult);
+    }
+
+    /**
+     * Test mixed capability actions are treated as text generators.
+     */
+    public function test_get_action_processor_class_prefers_text_for_mixed_capabilities(): void {
+        $this->resetAfterTest();
+
+        $manager = \core\di::get(manager::class);
+        $provider = $manager->create_provider_instance(
+            classname: '\aiprovider_openai\provider',
+            name: 'dummy',
+            config: ['apikey' => 'goeshere'],
+        );
+
+        $method = new \ReflectionMethod($manager, 'get_action_processor_class');
+
+        $processorclass = $method->invoke(
+            $manager,
+            $provider,
+            [
+                ai_capability::OUTPUT_IMAGE,
+                ai_capability::OUTPUT_TEXT,
+            ],
+        );
+
+        $this->assertSame(
+            'aiprovider_openai\process_generate_text',
+            $processorclass
+        );
     }
 
     /**

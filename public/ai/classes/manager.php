@@ -17,6 +17,7 @@
 namespace core_ai;
 
 use core\exception\coding_exception;
+use core_ai\aiactions\ai_capability;
 use core_ai\aiactions\base;
 use core_ai\aiactions\responses;
 use core\plugininfo\aiprovider as aiproviderplugin;
@@ -164,12 +165,32 @@ class manager {
      * @return responses\response_base The result of the action.
      */
     protected function call_action_provider(provider $provider, base $action): responses\response_base {
-        $classname = 'process_' . $action->get_basename();
-        $classpath = substr($provider::class, 0, strpos($provider::class, '\\') + 1);
-        $processclass = $classpath . $classname;
+        $capabilities = $action::get_required_capabilities();
+        if ($capabilities === []) {
+            throw new coding_exception('AI action does not declare any capabilities: ' . $action::class);
+        }
+
+        $processclass = self::get_action_processor_class($provider, $capabilities);
         $processor = new $processclass($provider, $action);
 
         return $processor->process($action);
+    }
+
+    /**
+     * Get the provider processor class for the given action capabilities.
+     *
+     * Mixed text-and-image actions are treated as text generators for now.
+     *
+     * @param provider $provider The provider to call.
+     * @param ai_capability[] $capabilities The action capabilities.
+     * @return string The processor class name.
+     */
+    private static function get_action_processor_class(provider $provider, array $capabilities): string {
+        if (in_array(ai_capability::OUTPUT_TEXT, $capabilities, true)) {
+            return ai_capability::OUTPUT_TEXT->get_processor_class($provider);
+        }
+
+        return ai_capability::OUTPUT_IMAGE->get_processor_class($provider);
     }
 
     /**

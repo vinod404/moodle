@@ -14,24 +14,27 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace aiprovider_ollama;
+declare(strict_types=1);
+
+namespace fake_aihooktest;
+
+use core_ai\aiactions\hook_registered_action;
+use core_ai\hook\after_supported_ai_actions_registration;
 
 /**
- * Class process text summarisation.
- *
- * @package    aiprovider_ollama
- * @copyright  2024 Matt Porritt <matt.porritt@moodle.com>
+ * Hook callbacks for supported action registry tests.
+ * @package    core_ai
+ * @copyright  2026, Aleti Vinod Kumar <vinod.aleti@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 5.3 MDL-89359. Use process_generate_text instead.
  */
-#[\core\attribute\deprecated(
-    replacement: 'process_generate_text',
-    since: '5.3',
-    mdl: 'MDL-89359',
-)]
-class process_summarise_text extends process_generate_text {
-    #[\Override]
-    protected function get_system_instruction(): string {
-        return $this->provider->actionconfig[$this->action::class]['settings']['systeminstruction'];
+class hook_callbacks {
+    /**
+     * Register a test action through the supported actions hook.
+     *
+     * @param after_supported_ai_actions_registration $hook
+     * @return void
+     */
+    public static function register_test_action(after_supported_ai_actions_registration $hook): void {
+        $hook->add_action(hook_registered_action::class);
     }
 }

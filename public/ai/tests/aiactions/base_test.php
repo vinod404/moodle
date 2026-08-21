@@ -84,11 +84,16 @@ final class base_test extends \advanced_testcase {
         $files = scandir($directory);
 
         foreach ($files as $file) {
-            // Match files that are PHP files and not specifically just 'base.*.php'.
-            if (str_ends_with($file, '.php')) {
-                $classname = str_replace('.php', '', $file);
-                $classes[] = 'core_ai\\aiactions\\' . $classname;
+            if (!str_ends_with($file, '.php')) {
+                continue;
             }
+
+            $classname = 'core_ai\\aiactions\\' . str_replace('.php', '', $file);
+            if (!is_a($classname, base::class, true)) {
+                continue;
+            }
+
+            $classes[] = $classname;
         }
 
         // Ensure that some classes were found.

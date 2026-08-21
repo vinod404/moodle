@@ -22,7 +22,13 @@ namespace aiprovider_azureai;
  * @package    aiprovider_azureai
  * @copyright  2024 Matt Porritt <matt.porritt@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated since Moodle 5.3 MDL-89359. Use process_generate_text instead.
  */
+#[\core\attribute\deprecated(
+    replacement: 'process_generate_text',
+    since: '5.3',
+    mdl: 'MDL-89359',
+)]
 class process_summarise_text extends process_generate_text {
 
 }

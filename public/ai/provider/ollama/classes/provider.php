@@ -16,6 +16,9 @@
 
 namespace aiprovider_ollama;
 
+use core\di;
+use core_ai\aiactions\ai_capability;
+use core_ai\aiactions\supported_actions;
 use core_ai\form\action_settings_form;
 use Psr\Http\Message\RequestInterface;
 
@@ -30,11 +33,9 @@ class provider extends \core_ai\provider {
 
     #[\Override]
     public static function get_action_list(): array {
-        return [
-            \core_ai\aiactions\generate_text::class,
-            \core_ai\aiactions\summarise_text::class,
-            \core_ai\aiactions\explain_text::class,
-        ];
+        return di::get(supported_actions::class)->get_actions_from_capabilities([
+            ai_capability::OUTPUT_TEXT,
+        ]);
     }
 
     #[\Override]

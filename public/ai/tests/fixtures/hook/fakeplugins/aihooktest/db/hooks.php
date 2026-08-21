@@ -14,24 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace aiprovider_ollama;
-
 /**
- * Class process text summarisation.
+ * Hook listener callbacks.
  *
- * @package    aiprovider_ollama
- * @copyright  2024 Matt Porritt <matt.porritt@moodle.com>
+ * @package    core_ai
+ * @copyright  2026, Aleti Vinod Kumar <vinod.aleti@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 5.3 MDL-89359. Use process_generate_text instead.
  */
-#[\core\attribute\deprecated(
-    replacement: 'process_generate_text',
-    since: '5.3',
-    mdl: 'MDL-89359',
-)]
-class process_summarise_text extends process_generate_text {
-    #[\Override]
-    protected function get_system_instruction(): string {
-        return $this->provider->actionconfig[$this->action::class]['settings']['systeminstruction'];
-    }
-}
+
+defined('MOODLE_INTERNAL') || die();
+
+$callbacks = [
+    [
+        'hook' => \core_ai\hook\after_supported_ai_actions_registration::class,
+        'callback' => \fake_aihooktest\hook_callbacks::class . '::register_test_action',
+    ],
+];
